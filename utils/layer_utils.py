@@ -9,7 +9,7 @@ from keras import constraints
 from keras.engine import Layer
 from keras.engine import InputSpec
 from keras.legacy import interfaces
-from keras.layers import RNN
+from keras.layers import Recurrent
 
 
 def _time_distributed_dense(x, w, b=None, dropout=None,
@@ -134,6 +134,7 @@ class AttentionLSTMCell(Layer):
             - [Bahdanau, Cho & Bengio (2014), "Neural Machine Translation by Jointly Learning to Align and Translate"](https://arxiv.org/pdf/1409.0473.pdf)
             - [Xu, Ba, Kiros, Cho, Courville, Salakhutdinov, Zemel & Bengio (2016), "Show, Attend and Tell: Neural Image Caption Generation with Visual Attention"](http://arxiv.org/pdf/1502.03044.pdf)
         """
+
     def __init__(self, units,
                  activation='tanh',
                  recurrent_activation='hard_sigmoid',
@@ -192,7 +193,6 @@ class AttentionLSTMCell(Layer):
         self.state_spec = [InputSpec(shape=(None, self.units)),
                            InputSpec(shape=(None, self.units))]
         self.state_size = (self.units, self.units)
-
 
     def build(self, input_shape):
 
@@ -297,7 +297,6 @@ class AttentionLSTMCell(Layer):
 
         self.built = True
 
-
     def _generate_dropout_mask(self, inputs, training=None):
         if 0 < self.dropout < 1:
             ones = K.ones_like(K.squeeze(inputs[:, 0:1, :], axis=1))
@@ -312,7 +311,6 @@ class AttentionLSTMCell(Layer):
                 for _ in range(4)]
         else:
             self._dropout_mask = None
-
 
     def _generate_recurrent_dropout_mask(self, inputs, training=None):
         if 0 < self.recurrent_dropout < 1:
@@ -329,7 +327,6 @@ class AttentionLSTMCell(Layer):
                 for _ in range(4)]
         else:
             self._recurrent_dropout_mask = None
-
 
     def call(self, inputs, states, training=None):
         # dropout matrices for input units
@@ -392,10 +389,14 @@ class AttentionLSTMCell(Layer):
                 h_tm1_f = h_tm1
                 h_tm1_c = h_tm1
                 h_tm1_o = h_tm1
-            i = self.recurrent_activation(x_i + K.dot(h_tm1_i, self.recurrent_kernel_i) + K.dot(z_hat, self.attention_i))
-            f = self.recurrent_activation(x_f + K.dot(h_tm1_f, self.recurrent_kernel_f) + K.dot(z_hat, self.attention_f))
-            c = f * c_tm1 + i * self.activation(x_c + K.dot(h_tm1_c, self.recurrent_kernel_c) + K.dot(z_hat, self.attention_c))
-            o = self.recurrent_activation(x_o + K.dot(h_tm1_o, self.recurrent_kernel_o) + K.dot(z_hat, self.attention_o))
+            i = self.recurrent_activation(
+                x_i + K.dot(h_tm1_i, self.recurrent_kernel_i) + K.dot(z_hat, self.attention_i))
+            f = self.recurrent_activation(
+                x_f + K.dot(h_tm1_f, self.recurrent_kernel_f) + K.dot(z_hat, self.attention_f))
+            c = f * c_tm1 + i * self.activation(
+                x_c + K.dot(h_tm1_c, self.recurrent_kernel_c) + K.dot(z_hat, self.attention_c))
+            o = self.recurrent_activation(
+                x_o + K.dot(h_tm1_o, self.recurrent_kernel_o) + K.dot(z_hat, self.attention_o))
         else:
             if 0. < self.dropout < 1.:
                 inputs *= dp_mask[0]
@@ -425,7 +426,7 @@ class AttentionLSTMCell(Layer):
         return h, [h, c]
 
 
-class AttentionLSTM(RNN):
+class AttentionLSTM(Recurrent):
     """Long-Short Term Memory unit - with Attention.
 
     # Arguments
@@ -517,6 +518,7 @@ class AttentionLSTM(RNN):
         - [Bahdanau, Cho & Bengio (2014), "Neural Machine Translation by Jointly Learning to Align and Translate"](https://arxiv.org/pdf/1409.0473.pdf)
         - [Xu, Ba, Kiros, Cho, Courville, Salakhutdinov, Zemel & Bengio (2016), "Show, Attend and Tell: Neural Image Caption Generation with Visual Attention"](http://arxiv.org/pdf/1502.03044.pdf)
     """
+
     @interfaces.legacy_recurrent_support
     def __init__(self, units,
                  activation='tanh',

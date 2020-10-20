@@ -4,8 +4,10 @@ import traceback
 
 from keras import backend as K
 from keras.layers import Conv1D, BatchNormalization, GlobalAveragePooling1D, Permute, Dropout, Flatten
-from keras.layers import Input, PReLU, Dense, LSTM, CuDNNLSTM, concatenate, Activation, GRU, SimpleRNN
+from keras.layers import Input, PReLU, Dense, LSTM, concatenate, Activation, GRU, SimpleRNN
 from keras.models import Model
+from tensorflow.python.keras.layers import CuDNNLSTM
+
 from utils.constants import MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 from utils.generic_utils import load_dataset_at
 from utils.keras_utils import train_model, evaluate_model, loss_model

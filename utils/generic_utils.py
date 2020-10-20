@@ -3,10 +3,9 @@ import pandas as pd
 import os
 import matplotlib as mpl
 import matplotlib.pylab as plt
+from utils.constants import TRAIN_FILES, TEST_FILES, MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 
 mpl.style.use('seaborn-paper')
-
-from utils.constants import TRAIN_FILES, TEST_FILES, MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 
 
 def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.array, np.array):
@@ -30,7 +29,8 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
         For legacy reasons, is_timeseries is always True.
     """
     assert index < len(TRAIN_FILES), "Index invalid. Could not load dataset at %d" % index
-    if verbose: print("Loading train / test dataset : ", TRAIN_FILES[index], TEST_FILES[index])
+    if verbose:
+        print("Loading train / test dataset : ", TRAIN_FILES[index], TEST_FILES[index])
 
     if os.path.exists(TRAIN_FILES[index]):
         df = pd.read_csv(TRAIN_FILES[index], header=None, encoding='latin-1')
@@ -41,7 +41,7 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
     else:
         raise FileNotFoundError('File %s not found!' % (TRAIN_FILES[index]))
 
-    is_timeseries = True # assume all input data is univariate time series
+    is_timeseries = True  # assume all input data is univariate time series
 
     # remove all columns which are completely empty
     df.dropna(axis=1, how='all', inplace=True)
@@ -85,7 +85,8 @@ def load_dataset_at(index, normalize_timeseries=False, verbose=True) -> (np.arra
                 X_train_std = X_train.std(axis=-1, keepdims=True)
                 X_train = (X_train - X_train_mean) / (X_train_std + 1e-8)
 
-    if verbose: print("Finished loading train dataset..")
+    if verbose:
+        print("Finished loading train dataset..")
 
     if os.path.exists(TEST_FILES[index]):
         df = pd.read_csv(TEST_FILES[index], header=None, encoding='latin-1')
@@ -202,8 +203,8 @@ def plot_dataset(dataset_id, seed=None, limit=None, cutoff=None,
 
     if plot_data is None:
         X_train, y_train, X_test, y_test, is_timeseries = load_dataset_at(
-                                                               dataset_id,
-                                                               normalize_timeseries=normalize_timeseries)
+            dataset_id,
+            normalize_timeseries=normalize_timeseries)
 
         if not is_timeseries:
             print("Can plot time series input data only!\n"
@@ -352,26 +353,26 @@ def plot_dataset(dataset_id, seed=None, limit=None, cutoff=None,
         cols = 2
 
     fig, axs = plt.subplots(rows, cols, squeeze=False,
-                           tight_layout=True, figsize=(8, 6))
+                            tight_layout=True, figsize=(8, 6))
     axs[0][0].set_title('Train dataset', size=16)
     axs[0][0].set_xlabel('timestep')
     axs[0][0].set_ylabel('value')
     train_df.plot(subplots=False,
                   legend='best',
-                  ax=axs[0][0],)
+                  ax=axs[0][0], )
 
     axs[0][1].set_title('Test dataset', size=16)
     axs[0][1].set_xlabel('timestep')
     axs[0][1].set_ylabel('value')
     test_df.plot(subplots=False,
                  legend='best',
-                 ax=axs[0][1],)
+                 ax=axs[0][1], )
 
     if plot_data is not None and X_train_attention is not None:
         columns = ['Class %d' % (i + 1) for i in range(X_train_attention.shape[1])]
         train_attention_df = pd.DataFrame(X_train_attention,
-                            index=range(X_train_attention.shape[0]),
-                            columns=columns)
+                                          index=range(X_train_attention.shape[0]),
+                                          columns=columns)
 
         axs[1][0].set_title('Train %s Sequence' % (type), size=16)
         axs[1][0].set_xlabel('timestep')

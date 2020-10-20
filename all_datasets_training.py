@@ -1,17 +1,20 @@
 import os
+import traceback
 
-from keras import backend as K
-from keras.layers import Conv1D, BatchNormalization, GlobalAveragePooling1D, Permute, Dropout, Flatten
-from keras.layers import Input, Dense, LSTM, CuDNNLSTM, concatenate, Activation, GRU, SimpleRNN
+from keras.layers import Conv1D, BatchNormalization, GlobalAveragePooling1D, Permute, Dropout
+from keras.layers import Input, Dense, LSTM, concatenate, Activation
 from keras.models import Model
-
+from keras import backend as K
 from utils.constants import MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST
 from utils.keras_utils import train_model, evaluate_model
 from utils.layer_utils import AttentionLSTM
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 def generate_lstmfcn(MAX_SEQUENCE_LENGTH, NB_CLASS, NUM_CELLS=8):
-
     ip = Input(shape=(1, MAX_SEQUENCE_LENGTH))
 
     x = LSTM(NUM_CELLS)(ip)
@@ -46,7 +49,6 @@ def generate_lstmfcn(MAX_SEQUENCE_LENGTH, NB_CLASS, NUM_CELLS=8):
 
 
 def generate_alstmfcn(MAX_SEQUENCE_LENGTH, NB_CLASS, NUM_CELLS=8):
-
     ip = Input(shape=(1, MAX_SEQUENCE_LENGTH))
 
     x = AttentionLSTM(NUM_CELLS)(ip)
@@ -212,9 +214,7 @@ if __name__ == "__main__":
                    ('UMD', 127)
                    ]
 
-    print("Num datasets : ", len(dataset_map))
-    print()
-
+    print("Num datasets : %d\n", len(dataset_map))
     base_log_name = '%s_%d_cells_new_datasets.csv'
     base_weights_dir = '%s_%d_cells_weights/'
 
@@ -224,6 +224,7 @@ if __name__ == "__main__":
     ]
 
     # Number of cells
+    # CELLS = [8, 64, 128]
     CELLS = [8, 64, 128]
 
     # Normalization scheme
@@ -259,45 +260,32 @@ if __name__ == "__main__":
 
                 dataset_name_ = weights_dir + dname
 
-                # try:
-                model = model_fn(MAX_SEQUENCE_LENGTH, NB_CLASS, cell)
+                try:
+                    model = model_fn(MAX_SEQUENCE_LENGTH, NB_CLASS, cell)
+                    print('*' * 20, "Training model for dataset %s" % (dname), '*' * 20)
 
-                print('*' * 20, "Training model for dataset %s" % (dname), '*' * 20)
+                    # comment out the training code to only evaluate !
+                    train_model(model, did, dataset_name_, epochs=2000, batch_size=128,
+                                normalize_timeseries=normalize_dataset)
 
-                # comment out the training code to only evaluate !
-                train_model(model, did, dataset_name_, epochs=2000, batch_size=128,
-                            normalize_timeseries=normalize_dataset)
+                    acc = evaluate_model(model, did, dataset_name_, batch_size=128,
+                                         normalize_timeseries=normalize_dataset)
 
-                acc = evaluate_model(model, did, dataset_name_, batch_size=128,
-                                     normalize_timeseries=normalize_dataset)
+                    s = "%d,%s,%s,%0.6f\n" % (did, dname, dataset_name_, acc)
 
-                s = "%d,%s,%s,%0.6f\n" % (did, dname, dataset_name_, acc)
+                    file.write(s)
+                    file.flush()
+                    successes.append(s)
+                except Exception as e:
+                    traceback.print_exc()
+                    s = "%d,%s,%s,%s\n" % (did, dname, dataset_name_, 0.0)
+                    failures.append(s)
+            file.close()
 
-                file.write(s)
-                file.flush()
+        print('\n\n', '*' * 20, "Successes", '*' * 20)
+        for line in successes:
+            print(line)
 
-                successes.append(s)
-
-                # except Exception as e:
-                #     traceback.print_exc()
-                #
-                #     s = "%d,%s,%s,%s\n" % (did, dname, dataset_name_, 0.0)
-                #     failures.append(s)
-                #
-                #     print()
-
-                file.close()
-
-            print('\n\n')
-            print('*' * 20, "Successes", '*' * 20)
-            print()
-
-            for line in successes:
-                print(line)
-
-            print('\n\n')
-            print('*' * 20, "Failures", '*' * 20)
-            print()
-
-            for line in failures:
-                print(line)
+        print('\n\n', '*' * 20, "Failures", '*' * 20)
+        for line in failures:
+            print(line)

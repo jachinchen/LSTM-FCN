@@ -1,16 +1,11 @@
-from keras.models import Model
-from keras.layers import Input, PReLU, Dense, LSTM, CuDNNLSTM, concatenate, Activation
-from keras.layers import Conv1D, BatchNormalization, GlobalAveragePooling1D, Permute, Dropout
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, PReLU, Dense, LSTM, concatenate, Activation
+from tensorflow.keras.layers import Conv1D, BatchNormalization, GlobalAveragePooling1D, Permute, Dropout
 
 from utils.constants import MAX_SEQUENCE_LENGTH_LIST, NB_CLASSES_LIST, TRAIN_FILES
 from utils.generic_utils import load_dataset_at
 from utils.keras_utils import visualize_filters
 from utils.layer_utils import AttentionLSTM
-
-import os
-import traceback
-import json
-from keras import backend as K
 
 
 def generate_lstmfcn(MAX_SEQUENCE_LENGTH, NB_CLASS, NUM_CELLS=8):

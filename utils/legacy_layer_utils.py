@@ -9,7 +9,7 @@ from keras import constraints
 from keras.engine import Layer
 from keras.engine import InputSpec
 from keras.legacy import interfaces
-from keras.layers import Recurrent
+from keras.layers import recurrent
 
 
 def _time_distributed_dense(x, w, b=None, dropout=None,
@@ -59,7 +59,7 @@ def _time_distributed_dense(x, w, b=None, dropout=None,
     return x
 
 
-class AttentionLSTM(Recurrent):
+class AttentionLSTM(recurrent):
     """Long-Short Term Memory unit - with Attention.
 
     # Arguments

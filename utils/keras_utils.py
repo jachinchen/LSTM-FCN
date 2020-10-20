@@ -27,7 +27,6 @@ from utils.constants import MAX_SEQUENCE_LENGTH_LIST, TRAIN_FILES
 mpl.style.use('seaborn-paper')
 warnings.simplefilter('ignore', category=DeprecationWarning)
 
-
 if not os.path.exists('weights/'):
     os.makedirs('weights/')
 
@@ -230,8 +229,8 @@ def set_trainable(layer, value):
 
     # case: container
     if hasattr(layer, 'layers'):
-        for l in layer.layers:
-            set_trainable(l, value)
+        for lr in layer.layers:
+            set_trainable(lr, value)
 
     # case: wrapper (which is a case not covered by the PR)
     if hasattr(layer, 'layer'):
@@ -280,7 +279,8 @@ def get_outputs(model, inputs, eval_functions, verbose=False):
     Returns:
         List of outputs of the Keras Model.
     """
-    if verbose: print('----- activations -----')
+    if verbose:
+        print('----- activations -----')
     outputs = []
     layer_outputs = [func([inputs, 1.])[0] for func in eval_functions]
     for layer_activations in layer_outputs:
@@ -833,6 +833,7 @@ def visualize_filters(model: Model, dataset_id, dataset_prefix,
 
     def mjrFormatter(x, pos):
         return '{:.2f}'.format(x)
+
     plt.gca().yaxis.set_major_formatter(FuncFormatter(mjrFormatter))
 
     plt.show()
