@@ -1,1 +1,9 @@
 dataset_id,dataset_name,dataset_name_,test_accuracy
+0,Adiac,lstmfcn_8_cells_weights/Adiac,0.785166
+1,ArrowHead,lstmfcn_8_cells_weights/ArrowHead,0.822857
+2,ChlorineConcentration,lstmfcn_8_cells_weights/ChlorineConcentration,0.805990
+3,InsectWingbeatSound,lstmfcn_8_cells_weights/InsectWingbeatSound,0.437879
+5,Wine,lstmfcn_8_cells_weights/Wine,0.500000
+8,Beef,lstmfcn_8_cells_weights/Beef,0.800000
+9,DistalPhalanxOutlineAgeGroup,lstmfcn_8_cells_weights/DistalPhalanxOutlineAgeGroup,0.669065
+10,DistalPhalanxOutlineCorrect,lstmfcn_8_cells_weights/DistalPhalanxOutlineCorrect,0.793478
